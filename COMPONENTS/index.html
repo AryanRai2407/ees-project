@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coconut - Wikipedia Replica</title>
+    <style>
+      /* --- Advanced CSS Variables --- */
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8f9fa;
+        --text-main: #202122;
+        --text-muted: #54595d;
+        --accent-color: #3366cc;
+        --border-color: #a2a9b1;
+        --table-border: #eaecf0;
+        --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --serif-font: "Linux Libertine", "Georgia", "Times", serif;
+        --sidebar-width: 280px;
+        --max-content-width: 1400px;
+      }
+
+      /* --- Reset & Base --- */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--font-family);
+        color: var(--text-main);
+        background-color: var(--bg-primary);
+        line-height: 1.6;
+      }
+      a {
+        color: var(--accent-color);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+
+      /* --- Top Navbar --- */
+      .navbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2rem;
+        background-color: var(--bg-primary);
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+      .navbar-brand {
+        font-size: 1.5rem;
+        font-weight: bold;
+        font-family: var(--serif-font);
+      }
+      .search-bar {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        width: 300px;
+        outline: none;
+        transition: box-shadow 0.2s;
+      }
+      .search-bar:focus {
+        box-shadow: 0 0 0 2px rgba(51, 102, 204, 0.4);
+      }
+
+      /* --- Layout --- */
+      .container {
+        display: grid;
+        grid-template-columns: var(--sidebar-width) 1fr;
+        gap: 2rem;
+        max-width: var(--max-content-width);
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      /* --- Sidebar & TOC --- */
+      .sidebar {
+        position: sticky;
+        top: 80px;
+        height: calc(100vh - 100px);
+        overflow-y: auto;
+        padding-right: 1rem;
+      }
+      .toc-title {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+      }
+      .toc-list {
+        list-style: none;
+        margin-left: 0.5rem;
+      }
+      .toc-list li {
+        margin-bottom: 0.4rem;
+      }
+      .toc-list a {
+        color: var(--text-main);
+        font-size: 0.95rem;
+        display: block;
+      }
+      .toc-list a:hover {
+        color: var(--accent-color);
+      }
+      .toc-sub {
+        margin-left: 1.5rem;
+        font-size: 0.9em;
+      }
+
+      /* --- Typography --- */
+      .content h1 {
+        font-family: var(--serif-font);
+        font-size: 2.5rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+      }
+      .content h2 {
+        font-family: var(--serif-font);
+        font-size: 1.8rem;
+        border-bottom: 1px solid var(--table-border);
+        margin: 2rem 0 1rem;
+        padding-bottom: 0.3rem;
+        clear: both;
+      }
+      .content h3 {
+        font-size: 1.3rem;
+        margin: 1.5rem 0 0.5rem;
+        clear: both;
+      }
+      .content p {
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        text-align: justify;
+      }
+      .content ul {
+        margin: 0 0 1rem 2rem;
+      }
+      .content li {
+        margin-bottom: 0.5rem;
+      }
+      .note {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        font-style: italic;
+      }
+
+      /* --- Wikipedia Image Thumbnails --- */
+      .wiki-thumb {
+        float: right;
+        width: 300px;
+        margin: 0.5rem 0 1.5rem 1.5rem;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        padding: 0.4rem;
+        border-radius: 2px;
+      }
+      .wiki-thumb.left {
+        float: left;
+        margin: 0.5rem 1.5rem 1.5rem 0;
+      }
+      .wiki-thumb img {
+        width: 100%;
+        height: auto;
+        border: 1px solid var(--border-color);
+        display: block;
+      }
+      .wiki-caption {
+        font-size: 0.85rem;
+        color: var(--text-main);
+        padding-top: 0.5rem;
+        line-height: 1.4;
+      }
+
+      /* --- Infobox --- */
+      .infobox {
+        float: right;
+        width: 320px;
+        margin: 0 0 1rem 1.5rem;
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-secondary);
+        padding: 1rem;
+        border-radius: 2px;
+      }
+      .infobox-title {
+        text-align: center;
+        font-size: 1.2rem;
+        font-style: italic;
+        font-weight: bold;
+        background: #d3e1ad;
+        padding: 0.5rem;
+        border-radius: 2px;
+        margin-bottom: 1rem;
+      }
+      .infobox table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+      }
+      .infobox th,
+      .infobox td {
+        padding: 0.4rem;
+        border-bottom: 1px solid var(--table-border);
+        text-align: left;
+        vertical-align: top;
+      }
+      .infobox th {
+        width: 40%;
+      }
+
+      /* --- Data Tables --- */
+      .data-table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 600px;
+        margin: 1.5rem 0;
+        font-size: 0.95rem;
+        border: 1px solid var(--border-color);
+      }
+      .data-table th,
+      .data-table td {
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem;
+        text-align: left;
+      }
+      .data-table th {
+        background-color: var(--bg-secondary);
+      }
+      .data-table caption {
+        caption-side: top;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-align: left;
+      }
+
+      /* --- Footer --- */
+      .site-footer {
+        text-align: center;
+        padding: 2rem;
+        margin-top: 2rem;
+        border-top: 1px solid var(--border-color);
+        background-color: var(--bg-secondary);
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+      .heart {
+        color: #e25555;
+      }
+
+      /* --- Responsive Design --- */
+      @media (max-width: 1024px) {
+        .container {
+          grid-template-columns: 1fr;
+          padding: 1.5rem;
+        }
+        .sidebar {
+          display: none;
+        }
+        .infobox,
+        .wiki-thumb,
+        .wiki-thumb.left {
+          float: none;
+          width: 100%;
+          margin: 1rem 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="navbar-brand">Aryan Rai</div>
+      <input type="text" class="search-bar" placeholder="Search Wikipedia..." />
+    </header>
+
+    <div class="container">
+      <aside class="sidebar">
+        <h3 class="toc-title">Contents</h3>
+        <ul class="toc-list">
+          <li><a href="#intro">(Top)</a></li>
+          <li>
+            <a href="#description">1 Description</a>
+            <ul class="toc-list toc-sub">
+              <li><a href="#fruit">1.1 Fruit</a></li>
+              <li><a href="#roots">1.2 Roots</a></li>
+            </ul>
+          </li>
+          <li><a href="#taxonomy">2 Taxonomy</a></li>
+          <li>
+            <a href="#origins">3 Origins</a>
+            <ul class="toc-list toc-sub">
+              <li><a href="#fossil-history">3.1 Fossil history</a></li>
+              <li><a href="#phylogeny">3.2 Phylogeny</a></li>
+              <li><a href="#human-dispersal">3.3 Human dispersal</a></li>
+              <li><a href="#domestication">3.4 Domestication</a></li>
+            </ul>
+          </li>
+          <li><a href="#distribution">4 Distribution and habitat</a></li>
+          <li>
+            <a href="#cultivation">5 Cultivation</a>
+            <ul class="toc-list toc-sub">
+              <li><a href="#pests">5.1 Pests and diseases</a></li>
+              <li><a href="#cultivars">5.2 Cultivars</a></li>
+              <li><a href="#breeding">5.3 Breeding</a></li>
+              <li><a href="#harvesting">5.4 Harvesting</a></li>
+            </ul>
+          </li>
+          <li><a href="#production">6 Production</a></li>
+          <li><a href="#health">7 Health concerns</a></li>
+          <li>
+            <a href="#uses">8 Uses</a>
+            <ul class="toc-list toc-sub">
+              <li><a href="#nutrition">8.1 Nutrition</a></li>
+              <li><a href="#culinary">8.2 Culinary</a></li>
+              <li><a href="#oil">8.3 Oil</a></li>
+              <li><a href="#non-food">8.4 Non-food uses</a></li>
+            </ul>
+          </li>
+          <li><a href="#culture">9 In culture</a></li>
+          <li><a href="#early-history">10 Early history</a></li>
+        </ul>
+      </aside>
+
+      <main class="content">
+        <h1 id="intro">Coconut</h1>
+        <div class="note">
+          This article is about the plant. For other uses, see Coconut
+          (disambiguation). "Coconut tree" redirects here. For other uses, see
+          Coconut Tree (disambiguation).
+        </div>
+
+        <aside class="infobox">
+          <div class="infobox-title">Cocos nucifera</div>
+          <img
+            src="../ASSETS/500px-Cocos_nucifera_-_Köhler–s_Medizinal-Pflanzen-187.jpg"
+            alt=""
+            style="width: 100%; border-radius: 2px; margin-bottom: 10px"
+          />
+          <table>
+            <tr>
+              <th colspan="2" style="text-align: center; background: #eaecf0">
+                Scientific classification
+              </th>
+            </tr>
+            <tr>
+              <th>Kingdom:</th>
+              <td>Plantae</td>
+            </tr>
+            <tr>
+              <th>Clade:</th>
+              <td>Tracheophytes</td>
+            </tr>
+            <tr>
+              <th>Clade:</th>
+              <td>Angiosperms</td>
+            </tr>
+            <tr>
+              <th>Clade:</th>
+              <td>Monocots</td>
+            </tr>
+            <tr>
+              <th>Clade:</th>
+              <td>Commelinids</td>
+            </tr>
+            <tr>
+              <th>Order:</th>
+              <td>Arecales</td>
+            </tr>
+            <tr>
+              <th>Family:</th>
+              <td>Arecaceae</td>
+            </tr>
+            <tr>
+              <th>Subfamily:</th>
+              <td>Arecoideae</td>
+            </tr>
+            <tr>
+              <th>Tribe:</th>
+              <td>Cocoseae</td>
+            </tr>
+            <tr>
+              <th>Subtribe:</th>
+              <td>Attaleinae</td>
+            </tr>
+            <tr>
+              <th>Genus:</th>
+              <td><i>Cocos</i> L.</td>
+            </tr>
+            <tr>
+              <th>Species:</th>
+              <td>
+                <i><b>C. nucifera</b></i>
+              </td>
+            </tr>
+            <tr>
+              <th colspan="2" style="text-align: center; background: #eaecf0">
+                Binomial name
+              </th>
+            </tr>
+            <tr>
+              <td colspan="2" style="text-align: center">
+                <i><b>Cocos nucifera</b></i> L.
+              </td>
+            </tr>
+            <tr>
+              <th colspan="2" style="text-align: center; background: #eaecf0">
+                Synonyms
+              </th>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <i>Coccus</i> Mill.<br /><i>Calappa</i> Steck<br /><i>Coccos</i>
+                Gaertn.
+              </td>
+            </tr>
+          </table>
+        </aside>
+
+        <div class="wiki-thumb left">
+          <img
+            src="../ASSETS/330px-Cocos_nucifera_(coconut)_2_(39384972311).jpg"
+            alt=""
+          />
+          <div class="wiki-caption">Coconut palm along a coastal region.</div>
+        </div>
+
+        <p>
+          The <b>coconut</b> (<i>Cocos nucifera</i>) is a member of the palm
+          family (Arecaceae) and the only living species of the genus
+          <i>Cocos</i>. The term "coconut" (or the archaic "cocoanut") can
+          denote the whole coconut palm tree or the large hard fruit. Originally
+          native to Central Indo-Pacific, they are ubiquitous in coastal
+          tropical regions.
+        </p>
+
+        <p>
+          The coconut tree provides food, fuel, cosmetics, folk medicine and
+          building materials. The inner flesh of the mature fruit forms a
+          regular part of the diets of many people in the tropics and
+          subtropics. Coconut endosperm contains a large quantity of a liquid,
+          "coconut water". Mature coconuts can be processed for oil and coconut
+          milk from the flesh, charcoal from the hard shell, and coir from the
+          fibrous husk. Dried coconut flesh is called copra, and the oil and
+          milk derived from it are commonly used in cooking and in soaps and
+          cosmetics. Sweet coconut sap can be made into drinks or fermented into
+          palm wine or coconut vinegar. The hard shells, fibrous husks and long
+          pinnate leaves are used to make a products for furnishing and
+          decoration.
+        </p>
+
+        <p>
+          The coconut has cultural and religious significance for Austronesian
+          peoples, appearing in their mythologies, songs, and oral traditions.
+          It has religious significance in South Asian cultures, where it is
+          used in Hindu rituals including weddings and worship.
+        </p>
+
+        <div class="wiki-thumb">
+          <img
+            src="../ASSETS/330px-Cocos_nucifera_(coconut)_5_(38507429165).jpg"
+            alt=""
+          />
+          <div class="wiki-caption">Close up of a coconut palm crown.</div>
+        </div>
+
+        <p>
+          The species evolved in the central Indo-Pacific. It was domesticated
+          by Austronesian peoples in Island Southeast Asia and spread during the
+          Neolithic via their seaborne migrations as far east as the Pacific
+          Islands, and as far west as Madagascar. The species played a critical
+          role in their long sea voyages by providing a portable source of food
+          and water, as well as building materials for outrigger boats. Coconuts
+          were spread much later along the coasts of the Indian and Atlantic
+          Oceans by South Asian, Arab, and from the 16th century by European
+          sailors. Based on these introductions, the species can be divided into
+          Pacific and Indo-Atlantic types.
+        </p>
+
+        <p>
+          Trees can grow up to 30 metres (100 feet) tall and can yield up to 75
+          fruits per year, though fewer than 30 is more typical. They are
+          intolerant to cold and prefer copious precipitation and full sunlight.
+          Many insect pests and diseases affect commercial production. In 2023,
+          world production of coconuts was 65 million tonnes, with 73% of the
+          total produced by Indonesia, India, and the Philippines.
+        </p>
+
+        <h2 id="description">Description</h2>
+        <div class="wiki-thumb left">
+          <img src="../ASSETS/330px-Coconut_half_exocarp_removed.jpg" alt="" />
+          <div class="wiki-caption">
+            Fruit with husk partly removed, showing hard thin shell of endocarp,
+            and the white solid endosperm.
+          </div>
+        </div>
+
+        <p>
+          <i>Cocos nucifera</i> is a large palm, growing up to 30 metres (100
+          feet) tall, with pinnate leaves 4–6 m (13–20 ft) long, and pinnae
+          60–90 centimetres (2–3 ft) long; old leaves break away cleanly,
+          leaving the trunk smooth. On fertile soil, a tall coconut palm tree
+          produces around 80 fruits per year; new varieties may be able to yield
+          as many as 150 per year. In India, average production is over 8,000
+          nuts per hectare per year. Tall varieties produce their first fruit in
+          6 to 10 years, and live for 60 to 100 years; dwarf varieties become
+          productive more quickly, but have a shorter lifespan.
+        </p>
+
+        <div class="wiki-thumb">
+          <img src="../ASSETS/330px-Coconut_tree_leave.jpeg" alt="" />
+          <div class="wiki-caption">Pinnate leaves of the coconut palm.</div>
+        </div>
+
+        <p>
+          The coconut is monoecious, meaning that both male and female flowers
+          grow on the same tree, in its case in the same inflorescence. It is
+          possible that the species in addition occasionally has bisexual
+          flowers. The female flower is much larger than the male flower. Mature
+          trees grow continuously, producing leaves, flowers, and fruit all year
+          round. It takes some 14 months for each flower primordium to develop
+          into an inflorescence, botanically a spadix inside a sheathing spathe.
+          A healthy tree can produce up to 15 inflorescences per year, staggered
+          so that there is always a mature one with others in different stages
+          of development.
+        </p>
+
+        <h3 id="fruit">Fruit</h3>
+        <table
+          class="data-table"
+          style="float: right; margin: 0 0 1rem 1rem; width: 300px"
+        >
+          <caption>
+            Composition of a Bido coconut
+          </caption>
+          <tr>
+            <th>Component</th>
+            <th>Mass / kg</th>
+          </tr>
+          <tr>
+            <td>Husk</td>
+            <td>2.033</td>
+          </tr>
+          <tr>
+            <td>Nut</td>
+            <td>1.125</td>
+          </tr>
+          <tr>
+            <td>- Shell</td>
+            <td>0.359</td>
+          </tr>
+          <tr>
+            <td>- Juice</td>
+            <td>0.492</td>
+          </tr>
+          <tr>
+            <td>- Meat</td>
+            <td>0.477</td>
+          </tr>
+          <tr>
+            <td><strong>Total</strong></td>
+            <td><strong>3.158</strong></td>
+          </tr>
+        </table>
+
+        <p>
+          Botanically, the coconut fruit is a drupe, not a true nut. Like other
+          fruits, it has three layers: the exocarp, mesocarp, and endocarp. The
+          exocarp is the glossy outer skin, usually yellow-green to yellow-brown
+          in color. The mesocarp is composed of a fiber, called coir, which has
+          many traditional and commercial uses. The exocarp and the mesocarp
+          make up the "husk" of the coconut, while the endocarp makes up the
+          hard coconut "shell". The endocarp is around 4 millimetres thick and
+          has three distinctive germination pores on the distal end. Two of the
+          pores are plugged (the "eyes"), while one is functional.
+        </p>
+
+        <div class="wiki-thumb left">
+          <img src="../ASSETS/250px-Brokencoconut.jpg" alt="" />
+          <div class="wiki-caption">
+            A broken coconut exposing the thick inner meat.
+          </div>
+        </div>
+
+        <p>
+          The interior of the endocarp is hollow and is lined with a thin brown
+          seed coat, some 0.2 mm thick. The endocarp is initially filled with a
+          liquid endosperm (the coconut water). The liquid contains many free
+          cell nuclei dividing by mitosis, without cell boundaries. As
+          development continues, cellular layers of endosperm deposit along the
+          walls of the endocarp up to 11 mm thick, starting at the far end. They
+          eventually form the edible solid endosperm ("coconut meat") which
+          hardens over time. The small cylindrical embryo is embedded in the
+          solid endosperm directly below the functional pore.
+        </p>
+
+        <p>
+          The fruits have two distinctive forms. Wild <i>niu kafa</i> coconuts
+          feature an elongated triangular fruit with a thicker husk and a
+          smaller amount of endosperm. Domesticated <i>niu vai</i> Pacific
+          coconuts are rounded in shape with a thinner husk, more endosperm, and
+          more coconut water.
+        </p>
+
+        <h3 id="roots">Roots</h3>
+        <div class="wiki-thumb">
+          <img
+            src="../ASSETS/330px-Coconut_germinating_on_Black_Sand_Beach,_Island_of_Hawaii.jpg"
+            alt=""
+          />
+          <div class="wiki-caption">
+            The palm tree has a fibrous adventitious root system near the
+            surface, with no central taproot.
+          </div>
+        </div>
+        <p>
+          The palm tree has neither a taproot nor root hairs, but a fibrous root
+          system. This consists of many thin roots that grow outward from the
+          plant near the surface. Only a few penetrate deep into the soil for
+          stability. This is known as a fibrous or adventitious root system, and
+          is a characteristic of grass species. 2,000–4,000 adventitious roots
+          may grow, each about 1 cm (1⁄2 in) in diameter. Decayed roots are
+          replaced regularly as the tree grows new ones.
+        </p>
+
+        <h2 id="taxonomy">Taxonomy</h2>
+        <p>
+          The Swedish botanist and taxonomist Carl Linnaeus formally described
+          the species <i>Cocos nucifera</i> in his book Species Plantarum in
+          1753. The generic name Cocos, and the common name, is derived from the
+          16th-century Portuguese word <i>coco</i>, meaning 'head' or 'skull'
+          after the three indentations on the coconut shell that give an
+          impression of a face. This apparently came from encounters in 1521 by
+          Portuguese and Spanish explorers with Pacific Islanders. The specific
+          name <i>nucifera</i> means "nut-bearing", from the Latin words nux
+          (nut) and fera (bearing).
+        </p>
+
+        <h2 id="origins">Origins</h2>
+        <h3 id="fossil-history">Fossil history</h3>
+        <p>
+          The vast majority of <i>Cocos</i>-like fossils have been recovered
+          from only two regions in the world: New Zealand and west-central
+          India. The earliest Cocos-like fossil to be found was
+          <i>C. zeylandica</i>, a fossil species with small fruits, from the
+          Miocene of New Zealand. In the Deccan Traps of west-central India,
+          numerous fossils of Cocos-like fruits, leaves, and stems have been
+          found.
+        </p>
+
+        <h3 id="human-dispersal">Human dispersal</h3>
+        <div class="wiki-thumb left">
+          <img
+            src="../ASSETS/500px-Cocos_nucifera_origin_native_range_map.svg.png"
+            alt=""
+          />
+          <div class="wiki-caption">
+            Possible native range of the coconut prior to human domestication.
+          </div>
+        </div>
+
+        <p>
+          Genetic studies identify the coconut's center of origin as the Central
+          Indo-Pacific, where it has its greatest genetic diversity. Its
+          cultivation and spread was closely tied to migrations of the
+          Austronesian peoples who carried coconuts to the islands they settled.
+          Drift models based on wind and ocean currents show that coconuts could
+          not have drifted across the Pacific unaided, implying that dispersal
+          was human-assisted.
+        </p>
+
+        <div class="wiki-thumb left">
+          <img
+            src="../ASSETS/500px-Geographical_distributions_of_Indo-Atlantic_and_Pacific_coconut_subpopulations.png"
+            alt=""
+          />
+          <div class="wiki-caption">
+            Geographical distributions of Indo-Atlantic and Pacific coconut
+            subpopulations indicating human dispersal routes.
+          </div>
+        </div>
+        <p>
+          Coconuts are divided into two subpopulations, a Pacific group from
+          Island Southeast Asia and an Indo-Atlantic group from the south of the
+          Indian subcontinent. The Pacific group is clearly domesticated.
+          Indo-Atlantic coconuts have the ancestral traits of tall habits and
+          elongated triangular fruits.
+        </p>
+
+        <h2 id="distribution">Distribution and habitat</h2>
+        <div class="wiki-thumb">
+          <img
+            src="../ASSETS/500px-Efate_East_-_Very_old_coconut_plantations_-_panoramio.jpg"
+            alt=""
+          />
+          <div class="wiki-caption">
+            Old coconut plantations in Efate, Vanuatu.
+          </div>
+        </div>
+        <p>
+          Coconuts have a nearly cosmopolitan distribution due to human
+          cultivation and dispersal. The coconut palm thrives on sandy soils and
+          is highly tolerant of salinity. It prefers areas with abundant
+          sunlight and regular rainfall of between 1500 mm and 2500 mm per year.
+          It grows from sea level to an altitude of 600 metres (2,000 ft) in the
+          tropics.
+        </p>
+
+        <h2 id="cultivation">Cultivation</h2>
+        <div class="wiki-thumb left">
+          <img src="../ASSETS/330px-Coconutlethalyellowing.jpg" alt="" />
+          <div class="wiki-caption">
+            Coconuts are susceptible to various phytoplasma diseases and pests
+            that cause frond yellowing and wilt.
+          </div>
+        </div>
+        <p>
+          Coconut palms are normally cultivated in hot and wet tropical
+          climates. They need year-round warmth and moisture to grow well and
+          fruit. Coconut palms are hard to establish in dry climates, and cannot
+          grow there without frequent irrigation. Uniquely among trees, coconut
+          trees can be irrigated with sea water.
+        </p>
+
+        <h3 id="pests">Pests and diseases</h3>
+        <p>
+          Coconuts are susceptible to the phytoplasma disease, lethal yellowing.
+          Yellowing diseases affect plantations in Africa, India, Mexico, the
+          Caribbean and the Pacific Region. The coconut palm is damaged by the
+          larvae of many Lepidoptera species, and the coconut leaf beetle
+          <i>Brontispa longissima</i> feeds on young leaves, damaging both
+          seedlings and mature palms. The fruit may also be damaged by eriophyid
+          coconut mites.
+        </p>
+
+        <h3 id="harvesting">Harvesting</h3>
+        <div class="wiki-thumb left">
+          <img src="../ASSETS/250px-Coconut_harvest.jpg" alt="" />
+          <div class="wiki-caption">
+            Traditional climbing is one of the most common harvesting methods,
+            requiring skilled workers.
+          </div>
+        </div>
+        <div class="wiki-thumb">
+          <img src="../ASSETS/250px-Coconut_notches.jpg" alt="" />
+          <div class="wiki-caption">
+            Notches cut into the trunk to aid climbing.
+          </div>
+        </div>
+        <p>
+          The two most common harvesting methods are by climbing and by using
+          poles. Climbing is more widespread, but it is more dangerous and
+          requires skilled workers. The pole method uses a long pole with a
+          cutting device at the end. In the Philippines, the traditional tool is
+          called the <i>halabas</i>. Some coconut farmers in Thailand and
+          Malaysia use southern pig-tailed macaques to harvest coconuts.
+        </p>
+
+        <h2 id="production">Production</h2>
+        <table class="data-table">
+          <caption>
+            Coconut (in shell) production (2023, millions of tonnes)
+          </caption>
+          <tr>
+            <th>Country</th>
+            <th>Production</th>
+          </tr>
+          <tr>
+            <td>Indonesia</td>
+            <td>18.0</td>
+          </tr>
+          <tr>
+            <td>Philippines</td>
+            <td>14.9</td>
+          </tr>
+          <tr>
+            <td>India</td>
+            <td>14.2</td>
+          </tr>
+          <tr>
+            <td>Brazil</td>
+            <td>2.9</td>
+          </tr>
+          <tr>
+            <td>Sri Lanka</td>
+            <td>2.1</td>
+          </tr>
+          <tr>
+            <td><strong>World</strong></td>
+            <td><strong>64.7</strong></td>
+          </tr>
+        </table>
+
+        <h2 id="uses">Uses</h2>
+        <p>
+          The coconut palm is grown throughout the tropics for decoration, as
+          well as for its culinary and nonculinary uses; virtually every part of
+          the coconut palm is used by humans in some manner and has significant
+          economic value.
+        </p>
+
+        <h3 id="culinary">Culinary</h3>
+        <div class="wiki-thumb left">
+          <img src="../ASSETS/330px-Coconutlethalyellowing.jpg" alt="" />
+          <div class="wiki-caption">
+            Culinary dishes frequently use coconut milk, cream, or flesh as
+            ingredients.
+          </div>
+        </div>
+        <div class="wiki-thumb">
+          <img src="../ASSETS/330px-Young_coconut_of_Srilanka.jpg" alt="" />
+          <div class="wiki-caption">
+            King coconut, a popular beverage cultivar from Sri Lanka.
+          </div>
+        </div>
+        <p>
+          The many culinary uses of coconuts are largely based on the edible
+          white, fleshy part of the seed. Coconut milk, used for cooking many
+          dishes, is pressed from coconut meat. Coconut water can be drunk fresh
+          or used in cooking. Coconut sap, fresh or fermented, is drunk as toddy
+          or tubâ in the Philippines.
+        </p>
+
+        <h3 id="oil">Oil</h3>
+        <div class="wiki-thumb left">
+          <img
+            src="../ASSETS/330px-Cocos_nucifera_(coconut)_5_(38507429165).jpg"
+            alt=""
+          />
+          <div class="wiki-caption">
+            Lambanog, a traditional Filipino distilled coconut wine.
+          </div>
+        </div>
+        <div class="wiki-thumb">
+          <img
+            src="../ASSETS/500px-Coconuts_-_single_and_cracked_open.jpg"
+            alt=""
+          />
+          <div class="wiki-caption">
+            Processed coconut oil and meat is used extensively in cooking and
+            cosmetics globally.
+          </div>
+        </div>
+        <p>
+          In 2022, world production of processed coconut oil was 3.2 million
+          tonnes, led by the Philippines with 43% of the total. Coconut oil is
+          used in cooking, especially for frying.
+        </p>
+
+        <h3 id="non-food">Non-food uses</h3>
+        <p>
+          Among the many non-food uses of coconut palms, the husk and shells can
+          be used for fuel or made into charcoal. Coir fiber from husks is used
+          in ropes, mats, brushes, and sacks. The hard shell is used to make
+          crafts and theatrical sound effects.
+        </p>
+
+        <h2 id="culture">In culture</h2>
+        <div class="wiki-thumb left">
+          <img
+            src="../ASSETS/500px-Efate_East_-_Very_old_coconut_plantations_-_panoramio.jpg"
+            alt=""
+          />
+          <div class="wiki-caption">
+            Offerings on the sand at Kuta Beach, Bali, made using woven coconut
+            leaves.
+          </div>
+        </div>
+        <div class="wiki-thumb">
+          <img src="../ASSETS/330px-Muñeco_de_coco.jpg" alt="" />
+          <div class="wiki-caption">
+            A "coconut monkey" souvenir from Mexico, carved from shells.
+          </div>
+        </div>
+        <p>
+          A coconut (Sanskrit: <i>narikela</i>) is used in Hindu rituals. Often
+          it is decorated with bright metal foils. It is offered during worship
+          to a Hindu god or goddess. The Zulu Social Aid and Pleasure Club of
+          New Orleans traditionally throws hand-decorated coconuts, one of the
+          most valuable Mardi Gras souvenirs, to parade revelers. The coconut is
+          also used as a target and prize in the traditional British fairground
+          game "coconut shy".
+        </p>
+
+        <h2 id="early-history">Early history</h2>
+        <p>
+          Literary evidence from the Ramayana and Sri Lankan chronicles
+          indicates that the coconut was present in the Indian subcontinent
+          before the 1st century BCE. The earliest direct description is given
+          by Cosmas Indicopleustes in his Topographia Christiana written around
+          545. In March 1521, Antonio Pigafetta described the coconut in his
+          journal during the Magellan circumnavigation.
+        </p>
+      </main>
+    </div>
+    <footer class="site-footer">
+      <p>Created with <span class="heart">&hearts;</span> by Aryan Rai</p>
+    </footer>
+  </body>
+</html>
